@@ -11,6 +11,7 @@ def get_args():
     parser.add_argument("--input", type=str, help="raw dataset path", required=True)
     parser.add_argument("--output_path", type=str, help="output dataset path", required=True)
     parser.add_argument("--output_name", type=str, help="output dataset name", required=True)
+    parser.add_argument("--gpunums", type=str, help="gpu nums", required=True)
 
     args = parser.parse_args()
     return args
@@ -48,8 +49,9 @@ def reformat_data(data):
 def main():
     args = get_args()
     files = os.listdir(args.input)
+
     for ds in files:
-        with build_dataset("tmp", "data", block_size=1<<22) as dataset:
+        with build_dataset("tmp", "data", block_size=16<<20) as dataset:
             with open(os.path.join(args.input, ds), "r", encoding="utf-8") as fin:
                 for line in tqdm(fin.readlines(), desc=os.path.join(args.input, ds)):
                     data = json.loads(line)
@@ -62,7 +64,7 @@ def main():
         line = json.loads(fm.readlines()[0])
         
         nbytes = line['nbytes']
-        target_size = nbytes / 128
+        target_size = nbytes / args.gpunums
         target_size = int(target_size - target_size%100)
 
         print('target_size:', target_size)
