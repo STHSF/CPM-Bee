@@ -21,30 +21,6 @@ def reformat_data(data):
     """set your data format"""
     return data
 
-# def main():
-#     args = get_args()
-#     files = os.listdir(args.input)
-#     for ds in files:
-#         if ds != 'dialogue_soda_eng':
-#             continue
-#         fp = os.path.join(args.input, ds, 'data')
-#         meta = os.path.join(fp,'meta.bin')
-#         fm = open(meta,'r')
-#         line = json.loads(fm.readlines()[0])
-#         nbytes = line['nbytes']
-#         target_size = nbytes / 512
-#         target_size = int(target_size - target_size%100)
-
-#         shuffle_dataset(
-#             fp,
-#             os.path.join(args.output_path, ds.split(".")[0],'data'),
-#             progress_bar=True,
-#             output_name=ds,
-#             block_size = target_size
-#         )
-
-#     return
-
 
 def main():
     args = get_args()
@@ -57,24 +33,21 @@ def main():
                     data = json.loads(line)
                     dataset.write(reformat_data(data))
         
-        # fp = os.path.join(args.input, ds, 'data')
         meta = os.path.join("tmp",'meta.bin')
-
         fm = open(meta,'r')
         line = json.loads(fm.readlines()[0])
-        
         nbytes = line['nbytes']
         target_size = nbytes / args.gpunums
-        target_size = int(target_size - target_size%100)
+        block_size = int(target_size - target_size%100)
 
-        print('target_size:', target_size)
+        print('target_size:', block_size)
 
         shuffle_dataset(
             "tmp",
             os.path.join(args.output_path, ds.split(".")[0]),
             progress_bar=True,
             output_name=args.output_name,
-            block_size=target_size
+            block_size=block_size
         )
         shutil.rmtree("tmp")
 
